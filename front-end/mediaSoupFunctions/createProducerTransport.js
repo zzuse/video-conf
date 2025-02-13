@@ -4,7 +4,18 @@ const createProducerTransport = () =>
       'requestTransport',
       { type }
     )
-    console.log(producerTransportParams)
+    const producerTransport = devicePixelRatio.createSendTransport(
+      producerTransportParams
+    )
+    producerTransport.on(
+      'connect',
+      async ({ dtlsParamters }, cancelIdleCallback, errback) => {}
+    )
+    producerTransport.on(
+      'produce',
+      async (parameters, cancelIdleCallback, errback) => {}
+    )
+    resolve(producerTransport)
   })
 
 export default createProducerTransport
