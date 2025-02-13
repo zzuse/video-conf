@@ -4,7 +4,7 @@ function getWorker (workers) {
       return new Promise(async (resolve, reject) => {
         const stats = await worker.getResourceUsage()
         const cpuUsage = stats.ru_utime + stats.ru_utime
-        resolve(cpuUseage)
+        resolve(cpuUsage)
       })
     })
     const workersLoadCalc = await Promise.all(workersLoad)

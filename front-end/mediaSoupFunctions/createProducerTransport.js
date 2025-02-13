@@ -9,12 +9,20 @@ const createProducerTransport = () =>
     )
     producerTransport.on(
       'connect',
-      async ({ dtlsParamters }, cancelIdleCallback, errback) => {}
+      async ({ dtlsParameters }, callback, errback) => {
+        const connectResp = await socket.emitWithAck('connectTransport', {
+          dtlsParameters,
+          type: 'producer'
+        })
+        console.log(connectResp, 'connectResp is back')
+        if (connectResp === 'success') {
+          callback()
+        } else if (connectResp === 'error') {
+          errback()
+        }
+      }
     )
-    producerTransport.on(
-      'produce',
-      async (parameters, cancelIdleCallback, errback) => {}
-    )
+    producerTransport.on('produce', async (parameters, callback, errback) => {})
     resolve(producerTransport)
   })
 

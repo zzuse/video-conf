@@ -22,6 +22,7 @@ const getWorker = require('./utilities/getWorker')
 //we need to load our config file
 const config = require('./config/config')
 const Client = require('./classes/Client')
+const Room = require('./classes/Room')
 //we changed our express setup so we can use https
 //pass the key and cert to createServer on https
 // const expressServer = https.createServer(options, app)
@@ -48,10 +49,10 @@ const initMediaSoup = async () => {
 initMediaSoup()
 
 io.on('connect', socket => {
-  let client
+  let client = null
   const handshake = socket.handshake // it is where auth and query live
   socket.on('joinRoom', async ({ userName, roomName }, ackCb) => {
-    client = new client(userName, socket)
+    client = new Client(userName, socket)
     let requestedRoom = rooms.find(room => room.roomName === roomName)
     if (!requestedRoom) {
       newRoom = true
@@ -72,6 +73,19 @@ io.on('connect', socket => {
     let clientTransportParams
     if (type === 'producer') {
       clientTransportParams = await client.addTransport(type)
+    } else if (type === 'consumer') {
+    }
+    ackCb(clientTransportParams)
+  })
+  socket.on('connectTransport', async ({ dtlsParameters, type }, ackCb) => {
+    if (type === 'producer') {
+      try {
+        await client.upStreamTransport.connect({ dtlsParameters })
+        ackCb('success')
+      } catch (error) {
+        console.log(error)
+        ackCb('error')
+      }
     } else if (type === 'consumer') {
     }
     ackCb(clientTransportParams)
