@@ -43,7 +43,17 @@ const config = {
       clockRate: 90000,
       parameters: {}
     }
-  ]
+  ],
+  webRtcTransport: {
+    listenIps: [
+      {
+        ip: '127.0.0.1',
+        announcedIp: null
+      }
+    ],
+    maxIncomingBitrate: 5000000,
+    initialAvailableOutgoingBitrate: 5000000
+  }
 }
 
 module.exports = config

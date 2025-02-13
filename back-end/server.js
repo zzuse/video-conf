@@ -54,6 +54,7 @@ io.on('connect', socket => {
     client = new client(userName, socket)
     let requestedRoom = rooms.find(room => room.roomName === roomName)
     if (!requestedRoom) {
+      newRoom = true
       const workerToUse = await getWorker(workers)
       requestedRoom = new Room(roomName, workerToUse)
       await requestedRoom.createRouter()
@@ -63,10 +64,17 @@ io.on('connect', socket => {
     client.room.addClient(client)
     socket.join(client.room.roomName)
     ackCb({
-      rtpcapabilities,
-      success: true,
-      roomName: roomName
+      rtpcapabilities: client.room.router.rtpCapabilities,
+      newRoom
     })
+  })
+  socket.on('requestTransport', async ({ type }, ackCb) => {
+    let clientTransportParams
+    if (type === 'producer') {
+      clientTransportParams = await client.addTransport(type)
+    } else if (type === 'consumer') {
+    }
+    ackCb(clientTransportParams)
   })
 })
 

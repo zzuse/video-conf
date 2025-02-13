@@ -18,3 +18,4 @@ function getWorker (workers) {
     resolve(workers[leastLoadedWorker])
   })
 }
+module.exports = getWorker
