@@ -22,7 +22,20 @@ const createProducerTransport = () =>
         }
       }
     )
-    producerTransport.on('produce', async (parameters, callback, errback) => {})
+    producerTransport.on('produce', async (parameters, callback, errback) => {
+      console.log('Produce event is now running')
+      const { kind, rtpParameters } = parameters
+      const connectResp = await socket.emitWithAck('startProducing', {
+        kind,
+        rtpParameters
+      })
+      console.log(connectResp, 'produceResp is back!')
+      if (connectResp === 'error') {
+        errback()
+      } else {
+        callback({ id: connectResp })
+      }
+    })
     resolve(producerTransport)
   })
 

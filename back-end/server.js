@@ -36,14 +36,10 @@ const io = socketio(httpServer, {
 })
 
 let workers = null
-let router = null
 const rooms = []
 const initMediaSoup = async () => {
   workers = await createWorkers()
   console.log('create worker successfully')
-  router = await workers[0].createRouter({
-    mediaCodecs: config.routerMediaCodecs
-  })
 }
 
 initMediaSoup()
@@ -52,6 +48,7 @@ io.on('connect', socket => {
   let client = null
   const handshake = socket.handshake // it is where auth and query live
   socket.on('joinRoom', async ({ userName, roomName }, ackCb) => {
+    let newRooom = false
     client = new Client(userName, socket)
     let requestedRoom = rooms.find(room => room.roomName === roomName)
     if (!requestedRoom) {
@@ -88,7 +85,18 @@ io.on('connect', socket => {
       }
     } else if (type === 'consumer') {
     }
-    ackCb(clientTransportParams)
+  })
+  socket.on('startProducing', async ({ kind, rtpParameters }, ackCb) => {
+    try {
+      const newProducer = client.upStreamTransport.produce({
+        kind,
+        rtpParameters
+      })
+      ackCb(newProducer.id)
+    } catch (err) {
+      console.log(err)
+      ackCb(err)
+    }
   })
 })
 
