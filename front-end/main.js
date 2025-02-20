@@ -30,18 +30,18 @@ const joinRoom = async () => {
     routerRtpCapabilities: joinRoomResp.routerRtpCapabilities
   })
   console.log(device)
-  buttons.control.classList.remove('d-node')
+  buttons.control.classList.remove('d-none')
 }
 
 const enableFeed = async () => {
   const mic2Id = await getMic2()
-  localSteam = await navigator.mediaDevices.getUserMedia({
+  localStream = await navigator.mediaDevices.getUserMedia({
     video: true,
     audio: { deviceId: { exact: mic2Id } }
   })
   buttons.localMediaLeft.srcObject = localStream
   buttons.enableFeed.disabled = true
-  buttons.sendFeed.disabled = true
+  buttons.sendFeed.disabled = false
   buttons.muteBtn.disabled = false
 }
 

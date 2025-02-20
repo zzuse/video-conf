@@ -1,21 +1,25 @@
-const createProducerTransport = () =>
+const createProducerTransport = (socket, device) =>
   new Promise(async (resolve, reject) => {
     const producerTransportParams = await socket.emitWithAck(
       'requestTransport',
-      { type }
+      { type: 'producer' }
     )
-    const producerTransport = devicePixelRatio.createSendTransport(
+    console.log('producerTransportParams:', producerTransportParams)
+    const producerTransport = device.createSendTransport(
       producerTransportParams
     )
+    console.log('producerTransport:', producerTransport)
     producerTransport.on(
       'connect',
       async ({ dtlsParameters }, callback, errback) => {
+        console.log('Connect running on produce...')
         const connectResp = await socket.emitWithAck('connectTransport', {
           dtlsParameters,
           type: 'producer'
         })
         console.log(connectResp, 'connectResp is back')
         if (connectResp === 'success') {
+          // callback does not mean finished but it means goto produce
           callback()
         } else if (connectResp === 'error') {
           errback()
@@ -25,15 +29,15 @@ const createProducerTransport = () =>
     producerTransport.on('produce', async (parameters, callback, errback) => {
       console.log('Produce event is now running')
       const { kind, rtpParameters } = parameters
-      const connectResp = await socket.emitWithAck('startProducing', {
+      const produceResp = await socket.emitWithAck('startProducing', {
         kind,
         rtpParameters
       })
-      console.log(connectResp, 'produceResp is back!')
-      if (connectResp === 'error') {
+      console.log(produceResp, 'produceResp is back!')
+      if (produceResp === 'error') {
         errback()
       } else {
-        callback({ id: connectResp })
+        callback({ id: produceResp })
       }
     })
     resolve(producerTransport)

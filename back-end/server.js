@@ -45,10 +45,10 @@ const initMediaSoup = async () => {
 initMediaSoup()
 
 io.on('connect', socket => {
-  let client = null
+  let client
   const handshake = socket.handshake // it is where auth and query live
   socket.on('joinRoom', async ({ userName, roomName }, ackCb) => {
-    let newRooom = false
+    let newRoom = false
     client = new Client(userName, socket)
     let requestedRoom = rooms.find(room => room.roomName === roomName)
     if (!requestedRoom) {
@@ -62,7 +62,7 @@ io.on('connect', socket => {
     client.room.addClient(client)
     socket.join(client.room.roomName)
     ackCb({
-      rtpcapabilities: client.room.router.rtpCapabilities,
+      routerRtpCapabilities: client.room.router.rtpCapabilities,
       newRoom
     })
   })
@@ -75,9 +75,11 @@ io.on('connect', socket => {
     ackCb(clientTransportParams)
   })
   socket.on('connectTransport', async ({ dtlsParameters, type }, ackCb) => {
+    console.log('dtls:', dtlsParameters)
+    console.log('type:', type)
     if (type === 'producer') {
       try {
-        await client.upStreamTransport.connect({ dtlsParameters })
+        await client.upstreamTransport.connect({ dtlsParameters })
         ackCb('success')
       } catch (error) {
         console.log(error)
@@ -88,7 +90,7 @@ io.on('connect', socket => {
   })
   socket.on('startProducing', async ({ kind, rtpParameters }, ackCb) => {
     try {
-      const newProducer = client.upStreamTransport.produce({
+      const newProducer = client.upstreamTransport.produce({
         kind,
         rtpParameters
       })

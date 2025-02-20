@@ -4,7 +4,7 @@ class Client {
     this.userName = userName
     this.socket = socket
     // instead calling this producer Transport, call it upsteam
-    this.upstreamTrasnport = null
+    this.upstreamTransport = null
     this.producer = {}
     // instead calling this consuer Transport, call it downstream
     this.downstreamTransports = []
@@ -30,7 +30,7 @@ class Client {
           console.log('Error setting bitrate')
         }
       }
-
+      console.log(transport)
       const clientTransportParams = {
         id: transport.id,
         iceParameters: transport.iceParameters,
@@ -38,7 +38,7 @@ class Client {
         dtlsParameters: transport.dtlsParameters
       }
       if (type === 'producer') {
-        this.upstreamTrasnport = transport
+        this.upstreamTransport = transport
       } else if (type === 'consumer') {
       }
       resolve(clientTransportParams)
