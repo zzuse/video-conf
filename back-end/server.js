@@ -5,7 +5,7 @@ const http = require('http')
 const express = require('express')
 const app = express()
 // app.use(express.static(__dirname))
-app.use(express.static('public'))
+// app.use(express.static('public'))
 
 //we need a key and cert to run https
 //we generated them with mkcert
@@ -90,7 +90,7 @@ io.on('connect', socket => {
   })
   socket.on('startProducing', async ({ kind, rtpParameters }, ackCb) => {
     try {
-      const newProducer = client.upstreamTransport.produce({
+      const newProducer = await client.upstreamTransport.produce({
         kind,
         rtpParameters
       })

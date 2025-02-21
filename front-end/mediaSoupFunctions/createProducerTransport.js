@@ -5,7 +5,7 @@ const createProducerTransport = (socket, device) =>
       { type: 'producer' }
     )
     console.log('producerTransportParams:', producerTransportParams)
-    const producerTransport = device.createSendTransport(
+    const producerTransport = await device.createSendTransport(
       producerTransportParams
     )
     console.log('producerTransport:', producerTransport)
