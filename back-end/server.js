@@ -55,7 +55,7 @@ io.on('connect', socket => {
       newRoom = true
       const workerToUse = await getWorker(workers)
       requestedRoom = new Room(roomName, workerToUse)
-      await requestedRoom.createRouter()
+      await requestedRoom.createRouter(io)
       rooms.push(requestedRoom)
     }
     client.room = requestedRoom
@@ -94,6 +94,7 @@ io.on('connect', socket => {
         kind,
         rtpParameters
       })
+      client.addProducer(kind, newProducer)
       ackCb(newProducer.id)
     } catch (err) {
       console.log(err)
