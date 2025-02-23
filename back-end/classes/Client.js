@@ -25,9 +25,10 @@ class Client {
 
       if (maxIncomingBitrate) {
         try {
-          await transport.setMaxIncomingBitRate(maxIncomingBitrate)
+          await transport.setMaxIncomingBitrate(maxIncomingBitrate)
         } catch (err) {
           console.log('Error setting bitrate')
+          console.log(err)
         }
       }
       console.log(transport)

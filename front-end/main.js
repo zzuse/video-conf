@@ -54,6 +54,24 @@ const sendFeed = async () => {
   console.log(producers)
   buttons.hangUp.disabled = false
 }
+
+const muteAudio = () => {
+  if (audioProducer.paused) {
+    audioProducer.resume()
+    buttons.muteBtn.innerHTML = 'Audio On'
+    buttons.muteBtn.classList.add('btn-success') // turn it green
+    buttons.muteBtn.classList.remove('btn-danger') // remove the red
+    socket.emit('audioChange', 'unmute')
+  } else {
+    audioProducer.pause()
+    buttons.muteBtn.innerHTML = 'Audio Muted'
+    buttons.muteBtn.classList.remove('btn-success') // remove it green
+    buttons.muteBtn.classList.add('btn-danger') // add the red
+    socket.emit('audioChange', 'mute')
+  }
+}
+
 buttons.joinRoom.addEventListener('click', joinRoom)
 buttons.enableFeed.addEventListener('click', enableFeed)
 buttons.sendFeed.addEventListener('click', sendFeed)
+buttons.muteBtn.addEventListener('click', muteAudio)

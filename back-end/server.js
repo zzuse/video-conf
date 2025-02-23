@@ -101,6 +101,13 @@ io.on('connect', socket => {
       ackCb(err)
     }
   })
+  socket.on('audioChange', typeOfChange => {
+    if (typeOfChange === 'mute') {
+      client?.producer?.audio?.pause()
+    } else {
+      client?.producer?.audio?.resume()
+    }
+  })
 })
 
 // expressServer.listen(config.port)
