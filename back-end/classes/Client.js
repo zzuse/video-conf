@@ -40,6 +40,17 @@ class Client {
       }
       if (type === 'producer') {
         this.upstreamTransport = transport
+        // stat start
+        setInterval(async () => {
+          const stats = await this.upstreamTransport.getStats()
+          for (const report of stats.values()) {
+            // console.log(report.type)
+            if (report.type === 'webrtc-transport') {
+              console.log(report.bytesReceived, '-', report.rtpBytesReceived)
+            }
+          }
+        }, 1000)
+        //stat end
       } else if (type === 'consumer') {
       }
       resolve(clientTransportParams)
