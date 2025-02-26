@@ -41,15 +41,14 @@ const createProducerTransport = (socket, device) =>
       }
     })
     // stat start
-    setInterval(async () => {
-      const stats = await producerTransport.getStats()
-      for (const report of stats.values()) {
-        // console.log(report.type)
-        if (report.type === 'outbound-rtp') {
-          console.log(report.bytesSent, '-', report.packetsSent)
-        }
-      }
-    }, 1000)
+    // setInterval(async () => {
+    //   const stats = await producerTransport.getStats()
+    //   for (const report of stats.values()) {
+    //     if (report.type === 'outbound-rtp') {
+    //       console.log(report.bytesSent, '-', report.packetsSent)
+    //     }
+    //   }
+    // }, 1000)
     //stat end
     resolve(producerTransport)
   })

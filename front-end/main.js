@@ -5,6 +5,7 @@ import { Device } from 'mediasoup-client'
 import getMic2 from './getMic2'
 import createProducerTransport from './mediaSoupFunctions/createProducerTransport'
 import createProducer from './mediaSoupFunctions/createProducer'
+import requestTransportToConsume from './mediaSoupFunctions/requestTransportToConsume'
 let device = null
 let localStream = null
 let producerTransport = null
@@ -30,6 +31,8 @@ const joinRoom = async () => {
     routerRtpCapabilities: joinRoomResp.routerRtpCapabilities
   })
   console.log(device)
+  console.log(joinRoomResp)
+  requestTransportToConsume(joinRoomResp, socket, device)
   buttons.control.classList.remove('d-none')
 }
 
