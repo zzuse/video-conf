@@ -104,8 +104,8 @@ io.on('connect', socket => {
     ackCb(clientTransportParams)
   })
   socket.on('connectTransport', async ({ dtlsParameters, type }, ackCb) => {
-    console.log('dtls:', dtlsParameters)
-    console.log('type:', type)
+    // console.log('dtls:', dtlsParameters)
+    // console.log('type:', type)
     if (type === 'producer') {
       try {
         await client.upstreamTransport.connect({ dtlsParameters })
@@ -135,6 +135,40 @@ io.on('connect', socket => {
       client?.producer?.audio?.pause()
     } else {
       client?.producer?.audio?.resume()
+    }
+  })
+  socket.on('consumeMedia', async ({ rtpCapabilities, pid, kind }, ackCb) => {
+    console.log('Kind: ', kind, '  pid:', pid)
+    try {
+      if (
+        !client.room.router.canConsume({ producerId: pid, rtpCapabilities })
+      ) {
+        ackCb('cannotConsume')
+      } else {
+        const downstreamTransports = client.downstreamTransports.find(t => {
+          if (kind === 'audio') {
+            return t.associatedAudioPid === pid
+          } else if (kind === 'video') {
+            return t.associatedVideoPid === pid
+          }
+        })
+        const newConsumer = await downstreamTransports.transport.consume({
+          producerId: pid,
+          rtpCapabilities,
+          paused: true
+        })
+        client.addConsumer(kind, newConsumer, downstreamTransports)
+        const clientParams = {
+          producerId: pid,
+          id: newConsumer.id,
+          kind: newConsumer.kind,
+          rtpParameters: newConsumer.rtpParameters
+        }
+        ackCb(clientParams)
+      }
+    } catch (err) {
+      console.log(err)
+      ackCb('consumeFailed')
     }
   })
 })

@@ -8,7 +8,13 @@ class Client {
     this.producer = {}
     // instead calling this consuer Transport, call it downstream
     this.downstreamTransports = []
-    this.consumers = []
+    // [
+    // transport,
+    // associatedVideoPid: videoPid,
+    // associatedAudioPid: audioPid
+    // audio = audioProducer
+    // video = videoProducer
+    // ]
     this.room = null
   }
   addTransport (type, audioPid = null, videoPid = null) {
@@ -31,7 +37,7 @@ class Client {
           console.log(err)
         }
       }
-      console.log(transport)
+      // console.log(transport)
       const clientTransportParams = {
         id: transport.id,
         iceParameters: transport.iceParameters,
@@ -67,6 +73,9 @@ class Client {
         producerId: newProducer.id
       })
     }
+  }
+  addConsumer (kind, newConsumer, downstreamTransports) {
+    downstreamTransports[kind] = newConsumer
   }
 }
 
