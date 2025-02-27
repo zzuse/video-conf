@@ -1,7 +1,7 @@
 import createConsumerTransport from './createConsumerTransport'
 import createConsumer from './createConsumer'
 
-const requestTransportToConsume = (consumeData, socket, device) => {
+const requestTransportToConsume = (consumeData, socket, device, consumers) => {
   consumeData.audioPidsToCreate.forEach(async (audioPid, i) => {
     const videoPid = consumeData.videoPidsToCreate[i]
     const consumerTransportParams = await socket.emitWithAck(
@@ -21,6 +21,20 @@ const requestTransportToConsume = (consumeData, socket, device) => {
     ])
     console.log(audioConsumer)
     console.log(videoConsumer)
+    const combinedStream = new MediaStream([
+      audioConsumer?.track,
+      videoConsumer?.track
+    ])
+    const remoteVideo = document.getElementById(`remote-video-${i}`)
+    remoteVideo.srcObject = combinedStream
+    console.log('Hope this works...')
+    consumers[audioPid] = {
+      combinedStream,
+      userName: consumeData.associatedUserNames[i],
+      consumerTransport,
+      audioConsumer,
+      videoConsumer
+    }
   })
 }
 export default requestTransportToConsume

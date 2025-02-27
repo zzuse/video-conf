@@ -11,11 +11,38 @@ let localStream = null
 let producerTransport = null
 let videoProducer = null
 let audioProducer = null
+let consumers = {}
 
 const socket = io.connect('http://localhost:8182')
 // FOR LOCAL ONLY... no https
 socket.on('connect', () => {
   console.log('Connected')
+})
+
+socket.on('updateActiveSpeakers', async newListOfActives => {
+  console.log('updateActiveSpeakers')
+  console.log(newListOfActives)
+  let slot = 0
+  const remoteEls = document.getElementsByClassName('remote-video')
+  for (let el of remoteEls) {
+    el.srObject = null
+  }
+  newListOfActives.forEach(aid => {
+    if (aid !== audioProducer?.id) {
+      const remoteVideo = document.getElementById(`remote-video-${slot}`)
+      const remoteVideoUserName = document.getElementById(`username-${slot}`)
+      const consumerForThisSlot = consumers[aid]
+      remoteVideo.srcObject = consumerForThisSlot?.combinedStream
+      remoteVideoUserName.innerHTML = consumerForThisSlot?.userName
+      slot++
+    }
+  })
+})
+
+socket.on('newProducersToConsume', consumeData => {
+  console.log('newProducersToConsume')
+  console.log(consumeData)
+  requestTransportToConsume(consumeData, socket, device, consumers)
 })
 
 const joinRoom = async () => {
@@ -32,7 +59,7 @@ const joinRoom = async () => {
   })
   console.log(device)
   console.log(joinRoomResp)
-  requestTransportToConsume(joinRoomResp, socket, device)
+  requestTransportToConsume(joinRoomResp, socket, device, consumers)
   buttons.control.classList.remove('d-none')
 }
 

@@ -12,8 +12,8 @@ class Client {
     // transport,
     // associatedVideoPid: videoPid,
     // associatedAudioPid: audioPid
-    // audio = audioProducer
-    // video = videoProducer
+    // audio = audioConsumer
+    // video = videoConsumer
     // ]
     this.room = null
   }

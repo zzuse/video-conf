@@ -6,6 +6,19 @@ const createConsumer = (consumerTransport, pid, device, socket, kind, slot) => {
       kind
     })
     console.log(consumerParams)
+    if (consumerParams === 'cannotConsume') {
+      console.log('Cannot consume')
+      resolve()
+    } else if (consumerParams === 'consumeFailed') {
+      console.log('Consume failed...')
+      resolve()
+    } else {
+      const consumer = await consumerTransport.consume(consumerParams)
+      console.log('consume() has finished')
+      const { track } = consumer
+      await socket.emit('unpauseConsumer', { pid, kind })
+      resolve(consumer)
+    }
   })
 }
 

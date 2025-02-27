@@ -19,6 +19,7 @@ const socketio = require('socket.io')
 const mediasoup = require('mediasoup')
 const createWorkers = require('./utilities/createWorkers')
 const getWorker = require('./utilities/getWorker')
+const updateActiveSpeakers = require('./utilities/updateActiveSpeakers')
 //we need to load our config file
 const config = require('./config/config')
 const Client = require('./classes/Client')
@@ -103,20 +104,33 @@ io.on('connect', socket => {
     }
     ackCb(clientTransportParams)
   })
-  socket.on('connectTransport', async ({ dtlsParameters, type }, ackCb) => {
-    // console.log('dtls:', dtlsParameters)
-    // console.log('type:', type)
-    if (type === 'producer') {
-      try {
-        await client.upstreamTransport.connect({ dtlsParameters })
-        ackCb('success')
-      } catch (error) {
-        console.log(error)
-        ackCb('error')
+  socket.on(
+    'connectTransport',
+    async ({ dtlsParameters, type, audioPid }, ackCb) => {
+      // console.log('dtls:', dtlsParameters)
+      // console.log('type:', type)
+      if (type === 'producer') {
+        try {
+          await client.upstreamTransport.connect({ dtlsParameters })
+          ackCb('success')
+        } catch (error) {
+          console.log(error)
+          ackCb('error')
+        }
+      } else if (type === 'consumer') {
+        try {
+          const downstreamTransport = client.downstreamTransports.find(t => {
+            return t.associatedAudioPid === audioPid
+          })
+          downstreamTransport.transport.connect({ dtlsParameters })
+          ackCb('success')
+        } catch (error) {
+          console.log(error)
+          ackCb('error')
+        }
       }
-    } else if (type === 'consumer') {
     }
-  })
+  )
   socket.on('startProducing', async ({ kind, rtpParameters }, ackCb) => {
     try {
       const newProducer = await client.upstreamTransport.produce({
@@ -124,10 +138,37 @@ io.on('connect', socket => {
         rtpParameters
       })
       client.addProducer(kind, newProducer)
+      if (kind === 'audio') {
+        client.room.activeSpeakerList.push(newProducer.id)
+      }
       ackCb(newProducer.id)
     } catch (err) {
       console.log(err)
       ackCb(err)
+    }
+    const newTransportsByPeer = updateActiveSpeakers(client.room, io)
+    for (const [socketId, audioPidsToCreate] of Object.entries(
+      newTransportsByPeer
+    )) {
+      const videoPidsToCreate = audioPidsToCreate.map(aPid => {
+        const producerClient = client.room.clients.find(
+          c => c?.producer?.audio?.id === aPid
+        )
+        return producerClient?.producer?.video?.id
+      })
+      const associatedUserNames = audioPidsToCreate.map(aPid => {
+        const producerClient = client.room.clients.find(
+          c => c?.producer?.audio?.id === aPid
+        )
+        return producerClient?.userName
+      })
+      io.to(socketId).emit('newProducersToConsume', {
+        routerRtpCapabilities: client.room.router.rtpCapabilities,
+        audioPidsToCreate,
+        videoPidsToCreate,
+        associatedUserNames,
+        activeSpeakerList: client.room.activeSpeakerList.slice(0, 5)
+      })
     }
   })
   socket.on('audioChange', typeOfChange => {
@@ -170,6 +211,13 @@ io.on('connect', socket => {
       console.log(err)
       ackCb('consumeFailed')
     }
+  })
+  socket.on('unpauseConsumer', async ({ pid, kind }, ackCb) => {
+    const consumerToResume = client.downstreamTransports.find(t => {
+      return t?.[kind].producerId === pid
+    })
+    await consumerToResume[kind].resume()
+    // ackCb()
   })
 })
 
