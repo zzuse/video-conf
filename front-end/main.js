@@ -6,6 +6,7 @@ import getMic2 from './getMic2'
 import createProducerTransport from './mediaSoupFunctions/createProducerTransport'
 import createProducer from './mediaSoupFunctions/createProducer'
 import requestTransportToConsume from './mediaSoupFunctions/requestTransportToConsume'
+
 let device = null
 let localStream = null
 let producerTransport = null
@@ -13,7 +14,7 @@ let videoProducer = null
 let audioProducer = null
 let consumers = {}
 
-const socket = io.connect('http://localhost:8182')
+const socket = io.connect('https://localhost:8182')
 // FOR LOCAL ONLY... no https
 socket.on('connect', () => {
   console.log('Connected')

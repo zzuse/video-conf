@@ -1,4 +1,4 @@
-const createProducer = async (localStream, producerTransport) => {
+const createProducer = (localStream, producerTransport) => {
   return new Promise(async (resolve, reject) => {
     const videoTrack = localStream.getVideoTracks()[0]
     const audioTrack = localStream.getAudioTracks()[0]

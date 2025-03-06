@@ -5,7 +5,7 @@ const createProducerTransport = (socket, device) =>
       { type: 'producer' }
     )
     console.log('producerTransportParams:', producerTransportParams)
-    const producerTransport = await device.createSendTransport(
+    const producerTransport = device.createSendTransport(
       producerTransportParams
     )
     console.log('producerTransport:', producerTransport)
@@ -13,10 +13,13 @@ const createProducerTransport = (socket, device) =>
       'connect',
       async ({ dtlsParameters }, callback, errback) => {
         console.log('Connect running on produce...')
-        const connectResp = await socket.emitWithAck('connectTransport', {
-          dtlsParameters,
-          type: 'producer'
-        })
+        const connectResp = await socket.emitWithAck(
+          'connectTransport',
+          {
+            dtlsParameters,
+            type: 'producer'
+          }
+        )
         console.log(connectResp, 'connectResp is back')
         if (connectResp === 'success') {
           // callback does not mean finished but it means goto produce
@@ -26,20 +29,26 @@ const createProducerTransport = (socket, device) =>
         }
       }
     )
-    producerTransport.on('produce', async (parameters, callback, errback) => {
-      console.log('Produce event is now running')
-      const { kind, rtpParameters } = parameters
-      const produceResp = await socket.emitWithAck('startProducing', {
-        kind,
-        rtpParameters
-      })
-      console.log(produceResp, 'produceResp is back!')
-      if (produceResp === 'error') {
-        errback()
-      } else {
-        callback({ id: produceResp })
+    producerTransport.on(
+      'produce',
+      async (parameters, callback, errback) => {
+        console.log('Produce event is now running')
+        const { kind, rtpParameters } = parameters
+        const produceResp = await socket.emitWithAck(
+          'startProducing',
+          {
+            kind,
+            rtpParameters
+          }
+        )
+        console.log(produceResp, 'produceResp is back!')
+        if (produceResp === 'error') {
+          errback()
+        } else {
+          callback({ id: produceResp })
+        }
       }
-    })
+    )
     // stat start
     // setInterval(async () => {
     //   const stats = await producerTransport.getStats()

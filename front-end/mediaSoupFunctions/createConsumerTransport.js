@@ -12,11 +12,14 @@ const createConsumerTransport = (transportParams, device, socket, audioPid) => {
     'connect',
     async ({ dtlsParameters }, callback, errback) => {
       console.log('Transport connect event has fired!')
-      const connectResp = await socket.emitWithAck('connectTransport', {
-        dtlsParameters,
-        type: 'consumer',
-        audioPid
-      })
+      const connectResp = await socket.emitWithAck(
+        'connectTransport',
+        {
+          dtlsParameters,
+          type: 'consumer',
+          audioPid
+        }
+      )
       console.log(connectResp, 'connectResp is back!')
       if (connectResp === 'success') {
         callback()

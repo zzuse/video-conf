@@ -1,10 +1,13 @@
 const createConsumer = (consumerTransport, pid, device, socket, kind, slot) => {
   return new Promise(async (resolve, reject) => {
-    const consumerParams = await socket.emitWithAck('consumeMedia', {
-      rtpCapabilities: device.rtpCapabilities,
-      pid,
-      kind
-    })
+    const consumerParams = await socket.emitWithAck(
+      'consumeMedia',
+      {
+        rtpCapabilities: device.rtpCapabilities,
+        pid,
+        kind
+      }
+    )
     console.log(consumerParams)
     if (consumerParams === 'cannotConsume') {
       console.log('Cannot consume')
@@ -16,7 +19,10 @@ const createConsumer = (consumerTransport, pid, device, socket, kind, slot) => {
       const consumer = await consumerTransport.consume(consumerParams)
       console.log('consume() has finished')
       const { track } = consumer
-      await socket.emit('unpauseConsumer', { pid, kind })
+      await socket.emit(
+        'unpauseConsumer',
+        { pid, kind }
+      )
       resolve(consumer)
     }
   })

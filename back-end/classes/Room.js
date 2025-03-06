@@ -12,7 +12,7 @@ class Room {
   addClient (client) {
     this.clients.push(client)
   }
-  async createRouter (io) {
+  createRouter (io) {
     return new Promise(async (resolve, reject) => {
       this.router = await this.worker.createRouter({
         mediaCodecs: config.routerMediaCodecs
