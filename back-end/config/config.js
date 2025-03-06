@@ -1,5 +1,5 @@
 const config = {
-  port: 8182,
+  port: 8181,
   workerSettings: {
     rtcMinPort: 40000,
     rtcMaxPort: 41000,
@@ -49,7 +49,9 @@ const config = {
       {
         ip: '127.0.0.1',
         announcedIp: null
-      }
+      },
+      { protocol: 'udp', ip: '0.0.0.0', announcedIp: 'zzuseturn.duckdns.org' },
+      { protocol: 'tcp', ip: '0.0.0.0', announcedIp: 'zzuseturn.duckdns.org' }
     ],
     maxIncomingBitrate: 5000000,
     initialAvailableOutgoingBitrate: 5000000

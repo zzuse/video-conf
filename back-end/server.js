@@ -33,6 +33,9 @@ const io = socketio(expressServer, {
   // const io = socketio(httpServer, {
   // cors: [`http://localhost:5173`],
   cors: [`https://localhost:5173`],
+  cors: [`https://localhost:5173`],
+  cors: [`http://zzuseturn.duckdns.org:8181`],
+  cors: [`http://47.251.161.178:8181`],
   cors: [`https://localhost:${config.port}`]
 })
 

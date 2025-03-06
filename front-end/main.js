@@ -14,7 +14,7 @@ let videoProducer = null
 let audioProducer = null
 let consumers = {}
 
-const socket = io.connect('https://localhost:8182')
+const socket = io.connect('https://47.251.161.178:8181')
 // FOR LOCAL ONLY... no https
 socket.on('connect', () => {
   console.log('Connected')
@@ -65,10 +65,11 @@ const joinRoom = async () => {
 }
 
 const enableFeed = async () => {
-  const mic2Id = await getMic2()
+  // const mic2Id = await getMic2()
   localStream = await navigator.mediaDevices.getUserMedia({
     video: true,
-    audio: { deviceId: { exact: mic2Id } }
+    audio: true,
+    // audio: { deviceId: { exact: mic2Id } }
   })
   buttons.localMediaLeft.srcObject = localStream
   buttons.enableFeed.disabled = true
