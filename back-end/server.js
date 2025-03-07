@@ -11,8 +11,8 @@ const app = express()
 //we generated them with mkcert
 // $ mkcert create-ca
 // $ mkcert create-cert
-const key = fs.readFileSync('./config/cert.key')
-const cert = fs.readFileSync('./config/cert.crt')
+const key = fs.readFileSync('/etc/letsencrypt/live/zzuseturn.duckdns.org/privkey.pem')
+const cert = fs.readFileSync('/etc/letsencrypt/live/zzuseturn.duckdns.org/fullchain.pem')
 const options = { key, cert }
 
 const socketio = require('socket.io')
@@ -33,9 +33,7 @@ const io = socketio(expressServer, {
   // const io = socketio(httpServer, {
   // cors: [`http://localhost:5173`],
   cors: [`https://localhost:5173`],
-  cors: [`https://localhost:5173`],
-  cors: [`http://zzuseturn.duckdns.org:8181`],
-  cors: [`http://47.251.161.178:8181`],
+  cors: [`https://zzuseturn.duckdns.org:${config.port}`],
   cors: [`https://localhost:${config.port}`]
 })
 

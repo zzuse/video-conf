@@ -8,7 +8,7 @@
    npm install  
    <del>npm run dev</del>  
    npm run dev --https  
-   or npm run dev -- --host  
+   or npm run dev --https --  --host  
    open browser access https://$IP:5173/  
    npm install socket.io-client  
    npm install mediasoup-client  
