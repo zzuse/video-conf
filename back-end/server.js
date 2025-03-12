@@ -11,8 +11,10 @@ const app = express()
 //we generated them with mkcert
 // $ mkcert create-ca
 // $ mkcert create-cert
-const key = fs.readFileSync('/etc/letsencrypt/live/zzuseturn.duckdns.org/privkey.pem')
-const cert = fs.readFileSync('/etc/letsencrypt/live/zzuseturn.duckdns.org/fullchain.pem')
+const key = fs.readFileSync('./config/cert.key')
+const cert = fs.readFileSync('./config/cert.crt')
+// const key = fs.readFileSync('/etc/letsencrypt/live/zzuseturn.duckdns.org/privkey.pem')
+// const cert = fs.readFileSync('/etc/letsencrypt/live/zzuseturn.duckdns.org/fullchain.pem')
 const options = { key, cert }
 
 const socketio = require('socket.io')

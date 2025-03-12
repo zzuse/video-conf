@@ -14,7 +14,8 @@ let videoProducer = null
 let audioProducer = null
 let consumers = {}
 
-const socket = io.connect('https://zzuseturn.duckdns.org:8181')
+// const socket = io.connect('https://zzuseturn.duckdns.org:8181')
+const socket = io.connect('https://localhost:8181')
 // FOR LOCAL ONLY... no https
 socket.on('connect', () => {
   console.log('Connected')

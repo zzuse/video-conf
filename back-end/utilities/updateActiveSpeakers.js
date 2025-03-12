@@ -28,8 +28,8 @@ const updateActiveSpeakers = (room, io) => {
         t => t?.associatedAudioPid === pid
       )
       if (downstreamToStart) {
-        downstreamToStart?.audio.resume()
-        downstreamToStart?.video.resume()
+        downstreamToStart?.audio?.resume()
+        downstreamToStart?.video?.resume()
       } else {
         newSpeakersToThisClient.push(pid)
       }
