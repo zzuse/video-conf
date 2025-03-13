@@ -1,18 +1,20 @@
 const createProducerTransport = (socket, device) =>
   new Promise(async (resolve, reject) => {
+    console.log("Client 7.1: Event: requestTransport ")
     const producerTransportParams = await socket.emitWithAck(
       'requestTransport',
       { type: 'producer' }
     )
-    console.log('producerTransportParams:', producerTransportParams)
+    console.log('Client 7.2: Event Resp: producerTransportParams:', producerTransportParams)
     const producerTransport = device.createSendTransport(
       producerTransportParams
     )
-    console.log('producerTransport:', producerTransport)
+    console.log('Client 7.3: createSendTransport client half:', producerTransport)
     producerTransport.on(
       'connect',
       async ({ dtlsParameters }, callback, errback) => {
-        console.log('Connect running on produce...')
+        console.log('Client 7.5: Transport Listen for connect')
+        console.log('Client 7.6: Transport Emit Event: connectTransport')
         const connectResp = await socket.emitWithAck(
           'connectTransport',
           {
@@ -20,7 +22,7 @@ const createProducerTransport = (socket, device) =>
             type: 'producer'
           }
         )
-        console.log(connectResp, 'connectResp is back')
+        console.log('Client 7.7: Transport Resp connectTransport is back', connectResp)
         if (connectResp === 'success') {
           // callback does not mean finished but it means goto produce
           callback()
@@ -32,7 +34,7 @@ const createProducerTransport = (socket, device) =>
     producerTransport.on(
       'produce',
       async (parameters, callback, errback) => {
-        console.log('Produce event is now running')
+        console.log('Client 7.8: Transport Listen for produce, Transport Emit Event: startProducing')
         const { kind, rtpParameters } = parameters
         const produceResp = await socket.emitWithAck(
           'startProducing',
@@ -41,7 +43,7 @@ const createProducerTransport = (socket, device) =>
             rtpParameters
           }
         )
-        console.log(produceResp, 'produceResp is back!')
+        console.log('Client 7.9: Transport Resp startProducing is back', produceResp)
         if (produceResp === 'error') {
           errback()
         } else {

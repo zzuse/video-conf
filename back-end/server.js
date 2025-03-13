@@ -30,11 +30,12 @@ const Room = require('./classes/Room')
 //pass the key and cert to createServer on https
 const expressServer = https.createServer(options, app)
 // const httpServer = http.createServer(app)
-//create our socket.io server... it will listen to our express port
+// create our socket.io server... cors to our front-end port 5173
 const io = socketio(expressServer, {
   // const io = socketio(httpServer, {
   // cors: [`http://localhost:5173`],
   cors: [`https://localhost:5173`],
+  cors: [`https://zzuseturn.duckdns.org:5173`],
   cors: [`https://zzuseturn.duckdns.org:${config.port}`],
   cors: [`https://localhost:${config.port}`]
 })
@@ -48,9 +49,11 @@ const initMediaSoup = async () => {
 
 initMediaSoup()
 
+// Note: in socket.io when client disconnected, client will auto retry again, and endup with a bunch of new socket event listeners
 io.on('connect', socket => {
   let client
   const handshake = socket.handshake // it is where auth and query live
+  console.log("Server 1: Listening connected")
   socket.on(
     'joinRoom',
     async ({ userName, roomName }, ackCb) => {
@@ -66,6 +69,7 @@ io.on('connect', socket => {
       }
       client.room = requestedRoom
       client.room.addClient(client)
+      // socket.io does have Room concept
       socket.join(client.room.roomName)
 
       // fetch the first 0-5 pids
@@ -84,6 +88,7 @@ io.on('connect', socket => {
         )
         return producingClient?.userName
       })
+      console.log("Server 2: resp joinRoom: rtpCapabilities")
       ackCb({
         routerRtpCapabilities: client.room.router.rtpCapabilities,
         newRoom,
@@ -110,6 +115,7 @@ io.on('connect', socket => {
           videoPid
         )
       }
+      console.log("Server 3.4: resp requestTransport: clientTransportParams ", type)
       ackCb(clientTransportParams)
     }
   )
@@ -117,10 +123,11 @@ io.on('connect', socket => {
     'connectTransport',
     async ({ dtlsParameters, type, audioPid }, ackCb) => {
       // console.log('dtls:', dtlsParameters)
-      // console.log('type:', type)
+      console.log('Server 4.1: recv connectTransport: client transport connected type:', type)
       if (type === 'producer') {
         try {
           await client.upstreamTransport.connect({ dtlsParameters })
+          console.log("Server 4.2.x: resp success, upstreamTransport Transport connected")
           ackCb('success')
         } catch (error) {
           console.log(error)
@@ -132,6 +139,7 @@ io.on('connect', socket => {
             return t.associatedAudioPid === audioPid
           })
           downstreamTransport.transport.connect({ dtlsParameters })
+          console.log("Server 4.2.x: resp success, downstreamTransport Transport connected")
           ackCb('success')
         } catch (error) {
           console.log(error)
@@ -152,6 +160,7 @@ io.on('connect', socket => {
         if (kind === 'audio') {
           client.room.activeSpeakerList.push(newProducer.id)
         }
+        console.log("Server 5.1.x: resp startProducing: send front-end the producer id")
         ackCb(newProducer.id)
       } catch (err) {
         console.log(err)
@@ -173,6 +182,7 @@ io.on('connect', socket => {
           )
           return producerClient?.userName
         })
+        console.log('Server 9.2.x: emit newProducersToConsume event to front-end ')
         io.to(socketId).emit('newProducersToConsume', {
           routerRtpCapabilities: client.room.router.rtpCapabilities,
           audioPidsToCreate,
@@ -186,6 +196,7 @@ io.on('connect', socket => {
   socket.on(
     'audioChange',
     typeOfChange => {
+      console.log("Server 7.x: resp audioChange ")
       if (typeOfChange === 'mute') {
         client?.producer?.audio?.pause()
       } else {
@@ -197,30 +208,32 @@ io.on('connect', socket => {
     'consumeMedia',
     async ({ rtpCapabilities, pid, kind }, ackCb) => {
       // will run twice audio and video
-      console.log('Kind: ', kind, '  pid:', pid)
+      console.log('Server 3.8.1: recv consumeMedia for peer,', 'Kind: ', kind, ' pid:', pid)
       try {
         if (!client.room.router.canConsume({ producerId: pid, rtpCapabilities })) {
+          console.log('Server 3.8.1.x: canConsume fail for peer,', 'Kind: ', kind, ' pid:', pid)
           ackCb('cannotConsume')
         } else {
-          const downstreamTransports = client.downstreamTransports.find(t => {
+          const downstreamTransport = client.downstreamTransports.find(t => {
             if (kind === 'audio') {
               return t.associatedAudioPid === pid
             } else if (kind === 'video') {
               return t.associatedVideoPid === pid
             }
           })
-          const newConsumer = await downstreamTransports.transport.consume({
+          const newConsumer = await downstreamTransport.transport.consume({
             producerId: pid,
             rtpCapabilities,
             paused: true
           })
-          client.addConsumer(kind, newConsumer, downstreamTransports)
+          client.addConsumer(kind, newConsumer, downstreamTransport)
           const clientParams = {
             producerId: pid,
             id: newConsumer.id,
             kind: newConsumer.kind,
             rtpParameters: newConsumer.rtpParameters
           }
+          console.log('Server 3.8.2: resp consumeMedia with clientParams for peer,', 'Kind: ', kind, ' pid:', pid)
           ackCb(clientParams)
         }
       } catch (err) {

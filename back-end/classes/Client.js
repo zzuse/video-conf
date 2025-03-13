@@ -1,6 +1,6 @@
 const config = require('../config/config')
 class Client {
-  constructor (userName, socket) {
+  constructor(userName, socket) {
     this.userName = userName
     this.socket = socket
     // instead calling this producer Transport, call it upsteam
@@ -17,10 +17,11 @@ class Client {
     // ]
     this.room = null
   }
-  addTransport (type, audioPid = null, videoPid = null) {
+  addTransport(type, audioPid = null, videoPid = null) {
     return new Promise(async (resolve, reject) => {
       const { listenIps, initialAvailableOutgoingBitrate, maxIncomingBitrate } =
         config.webRtcTransport
+      console.log("Server 3.1: server half: createWebRtcTransport ")
       const transport = await this.room.router.createWebRtcTransport({
         enableUdp: true,
         enableTcp: true,
@@ -37,6 +38,7 @@ class Client {
           console.log(err)
         }
       }
+      console.log("Server 3.2: transport.setMaxIncomingBitrate")
       // console.log(transport)
       const clientTransportParams = {
         id: transport.id,
@@ -56,17 +58,19 @@ class Client {
         //   }
         // }, 1000)
         //stat end
+        console.log("Server 3.3.x: upstreamTransport created")
       } else if (type === 'consumer') {
         this.downstreamTransports.push({
           transport,
           associatedVideoPid: videoPid,
           associatedAudioPid: audioPid
         })
+        console.log("Server 3.3.x: downstreamTransports added")
       }
       resolve(clientTransportParams)
     })
   }
-  addProducer (kind, newProducer) {
+  addProducer(kind, newProducer) {
     this.producer[kind] = newProducer
     if (kind === 'audio') {
       this.room.activeSpeakerObserver.addProducer({
@@ -74,7 +78,7 @@ class Client {
       })
     }
   }
-  addConsumer (kind, newConsumer, downstreamTransports) {
+  addConsumer(kind, newConsumer, downstreamTransports) {
     downstreamTransports[kind] = newConsumer
   }
 }

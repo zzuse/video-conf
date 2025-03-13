@@ -38,6 +38,7 @@ const updateActiveSpeakers = (room, io) => {
       newTransportsByPeer[client.socket.id] = newSpeakersToThisClient
     }
   })
+  console.log('Server 9.1.x: emit updateActiveSpeakers event to front-end ')
   io.to(room.roomName).emit('updateActiveSpeakers', activeSpeakers)
   return newTransportsByPeer
 }

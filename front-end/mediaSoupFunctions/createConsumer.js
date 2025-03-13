@@ -8,7 +8,7 @@ const createConsumer = (consumerTransport, pid, device, socket, kind, slot) => {
         kind
       }
     )
-    console.log(consumerParams)
+    console.log('Client 8.4.1x: emit consumeMedia consume on:', kind, ',', consumerParams)
     if (consumerParams === 'cannotConsume') {
       console.log('Cannot consume')
       resolve()
@@ -17,7 +17,7 @@ const createConsumer = (consumerTransport, pid, device, socket, kind, slot) => {
       resolve()
     } else {
       const consumer = await consumerTransport.consume(consumerParams)
-      console.log('consume() has finished')
+      console.log('Client 8.8: consumerTransport.consume established, unpauseConsumer emit')
       const { track } = consumer
       await socket.emit(
         'unpauseConsumer',

@@ -18,12 +18,11 @@ let consumers = {}
 const socket = io.connect('https://localhost:8181')
 // FOR LOCAL ONLY... no https
 socket.on('connect', () => {
-  console.log('Connected')
+  console.log('Client 1: Connected')
 })
 
 socket.on('updateActiveSpeakers', async newListOfActives => {
-  console.log('updateActiveSpeakers')
-  console.log(newListOfActives)
+  console.log('Client 9.1: resp updateActiveSpeakers', newListOfActives)
   let slot = 0
   const remoteEls = document.getElementsByClassName('remote-video')
   for (let el of remoteEls) {
@@ -42,30 +41,30 @@ socket.on('updateActiveSpeakers', async newListOfActives => {
 })
 
 socket.on('newProducersToConsume', consumeData => {
-  console.log('newProducersToConsume')
-  console.log(consumeData)
+  console.log('Client 9.2: resp newProducersToConsume', consumeData)
   requestTransportToConsume(consumeData, socket, device, consumers)
 })
 
 const joinRoom = async () => {
-  console.log('Join room!')
+  console.log('Client 2: Button Click: emit joinRoom!')
   const userName = document.getElementById('username').value
   const roomName = document.getElementById('room-input').value
   const joinRoomResp = await socket.emitWithAck('joinRoom', {
     userName,
     roomName
   })
+  console.log('Client 3: joinRoomResp ', joinRoomResp)
   device = new Device()
   await device.load({
     routerRtpCapabilities: joinRoomResp.routerRtpCapabilities
   })
-  console.log(device)
-  console.log(joinRoomResp)
+  console.log("Client 4: device load rtpCapabilities ", device)
   requestTransportToConsume(joinRoomResp, socket, device, consumers)
   buttons.control.classList.remove('d-none')
 }
 
 const enableFeed = async () => {
+  console.log("Client 5: Button Click: Feed On ")
   // const mic2Id = await getMic2()
   localStream = await navigator.mediaDevices.getUserMedia({
     video: true,
@@ -79,16 +78,19 @@ const enableFeed = async () => {
 }
 
 const sendFeed = async () => {
+  console.log("Client 6: Button Click: Send Feed ")
+  // this transport handle both audio and video producers
   producerTransport = await createProducerTransport(socket, device)
-  console.log('Have producer transport. time to produce')
+  console.log('Client 7.4: Have producer transport. time to produce')
   const producers = await createProducer(localStream, producerTransport)
   audioProducer = producers.audioProducer
   videoProducer = producers.videoProducer
-  console.log(producers)
+  console.log('Client 7.x: ', producers)
   buttons.hangUp.disabled = false
 }
 
 const muteAudio = () => {
+  console.log("Client 8: Button Click: Audio On/Muted ")
   if (audioProducer.paused) {
     audioProducer.resume()
     buttons.muteBtn.innerHTML = 'Audio On'
