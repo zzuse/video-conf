@@ -25,6 +25,7 @@
    back-end/server.js  
    back-end/config/config.js  
    front-end/main.js  
+   front-end/vite.config.js
 3. npm install express mediasoup socket.io  
 4. nodemon ./server.js  
 
